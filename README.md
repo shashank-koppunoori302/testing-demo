@@ -1,6 +1,6 @@
 # fe-test
 
-A skill for AI coding agents that writes high-quality frontend tests.
+A skill for AI coding agents that writes frontend tests.
 
 Works with Claude Code, Cursor, GitHub Copilot, Gemini CLI, and Codex.
 
