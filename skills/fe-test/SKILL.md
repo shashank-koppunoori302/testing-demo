@@ -32,8 +32,10 @@ Check if `.testing-context.md` exists at the project root.
 Read and grep these without asking anything:
 - `package.json` — framework, test runner, utilities, project name
 - Any test config present: `vitest.config.*`, `jest.config.*`, `playwright.config.*`
-- Route or page-level files to infer candidate critical flows. Look for:
-  `src/routes/`, `src/pages/`, `src/App.*`, top-level `.svelte` / `.tsx` / `.vue` files
+- Route or page-level files to infer candidate critical flows:
+  - Grep the codebase for route definitions (`path:`, `<Route`, `createBrowserRouter`, `useRoutes`, `SvelteKit route`, `defineRoute`, `RouterView`) — the file that matches is the authoritative page list; read it fully
+  - Also scan `src/pages/`, `src/views/`, `src/routes/`, `src/screens/` recursively — look at subdirectories, not just the top level
+  - `src/App.*` and top-level `.svelte` / `.tsx` / `.vue` files as a fallback
 - Grep across all test files (`**/*.test.ts`, `**/*.spec.ts`) to extract the test fingerprint:
   - `vi.mock` — factory style used
   - `import.*mock` — mock path pattern (alias vs relative — note exact form)
