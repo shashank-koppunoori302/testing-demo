@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eo pipefail
 
 REPO="shashank-koppunoori302/testing-demo"
 BRANCH="main"
