@@ -349,6 +349,14 @@ If you hit any framework-specific gotchas while writing — note them after deli
 
 Only write to the adapter file if they confirm. Adapters are built from real failures — don't invent entries.
 
+**Determine test file placement before writing:**
+
+Grep for existing test files (`**/*.test.ts`, `**/*.test.tsx`, `**/*.spec.ts`) and check where they live relative to their source:
+- All in `__tests__/` subdirectories → place new file at `<source-dir>/__tests__/<ComponentName>.test.<ext>`
+- All colocated → place new file alongside the source as `<ComponentName>.test.<ext>`
+- Mixed → ask once: "Your repo has both `__tests__/` and colocated tests — which should I use here?"
+- No existing tests → default to `<source-dir>/__tests__/<ComponentName>.test.<ext>`
+
 Write exactly the confirmed scenarios. No extras. One test per scenario.
 
 Assert on observable outcomes only:
