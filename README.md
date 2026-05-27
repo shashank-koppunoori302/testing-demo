@@ -1,110 +1,91 @@
-# fe-test-kit
+# fe-test
 
-A portable AI agent plugin for writing high-quality frontend tests. Runs a structured pipeline: discover what matters → plan scenarios → write behavioral tests → remember decisions.
+A skill for AI coding agents that writes frontend tests.
 
-Works with any frontend framework. Compatible with Claude Code, Cursor, Codex, GitHub Copilot, and Gemini CLI.
-
----
-
-## Install
-
-```bash
-npx fe-test-kit
-```
-
-Auto-detects which agents are installed and copies files to the right place. No manual steps.
+Works with Claude Code, Cursor, GitHub Copilot, Gemini CLI, and Codex.
 
 ---
 
 ## What it does
 
-- **Asks before it writes.** Discovery questions before reading any code.
-- **Plans before it builds.** Proposes 4-5 scenarios for your approval — no code until you confirm.
-- **Writes behavioral tests.** User action → observable outcome. Not smoke tests, not coverage padding.
-- **Runs and verifies.** Executes tests immediately after writing. Never claims success without seeing them pass.
-- **Verifies before delivering.** Checks every test against 5 critical anti-patterns and fixes violations before you see the output.
-- **Gets smarter each session.** Stores decisions and patterns across sessions so you never repeat the same conversation.
+`fe-test` runs a structured pipeline every time you write tests:
+
+1. **Discover** — scans the codebase silently, maps coverage against your critical flows
+2. **Plan** — proposes test scenarios for your approval (no code written until you confirm)
+3. **Write** — writes behavioral tests: user action → observable outcome
+4. **Verify** — checks every test against 8 anti-patterns and fixes violations before you see output
+5. **Log** — appends a session entry to `.testing-log.md` so future sessions know what's been covered
 
 ---
 
-## Skills
+## What kind of tests it writes
 
-| Skill | When to use |
+- **Unit tests** — pure functions, validators, formatters, helpers
+- **Component tests** — rendering, props, conditional UI, local interactions
+- **Integration tests** — components that touch APIs, stores, router, permissions, or child components
+
+Tests assert on what the user observes — visible text, elements present or absent, interactions with behavioral proof. Not smoke tests, not coverage padding.
+
+Anti-patterns it catches before delivery:
+- Smoke assertions (`expect(container).not.toBeNull()` as the only check)
+- Placeholders (`expect(true).toBe(true)`)
+- Mock-call-only assertions (proves mock fired, not that the user saw anything)
+- Machine-specific paths (breaks CI and every other dev's machine)
+- Loose rejection checks
+- Excessive mocking (mocks so much that real code never runs)
+- Testing library/framework behavior (re-verifying code you didn't write)
+- CSS class assertions without behavioral proof
+
+---
+
+## Install
+
+**Interactive (recommended):**
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/shashank-koppunoori302/fe-test-kit/main/install.sh)
+```
+
+Prompts you to pick which agents to install for.
+
+**With flags (non-interactive):**
+```bash
+curl -fsSL https://raw.githubusercontent.com/shashank-koppunoori302/fe-test-kit/main/install.sh | bash -s -- --claude
+```
+
+Available flags:
+
+| Flag | Installs to |
 |---|---|
-| `/fe-testing-setup` | **Once per project.** Scans the repo, detects the stack, creates `.testing-context.md`. |
-| `/fe-test` | **Every time you write tests.** Full pipeline: discover → plan → write → run → remember. |
-| `/fe-test-learn` | **Ad-hoc only.** Save a decision or learning outside of a test session. |
-
-Start with `/fe-testing-setup`, then use `/fe-test` for everything after.
-
----
-
-## First use
-
-```
-/fe-testing-setup
-```
-
-Scans the repo, asks three questions (framework, product purpose, critical flows), and creates `.testing-context.md` at the project root. Commit that file — your whole team benefits from it on their first session.
-
-Then for every test session:
-
-```
-/fe-test
-```
-
-The pipeline asks what to test, proposes scenarios, writes the tests, runs them, and updates the context file when done.
+| `--claude` | `.claude/skills/` (project-level, commit to git) |
+| `--claude-user` | `~/.claude/skills/` (all your projects) |
+| `--cursor` | `.cursor/skills/` |
+| `--copilot` | `.github/copilot/skills/` |
+| `--gemini` | `~/.gemini/skills/` |
+| `--codex` | `.agents/skills/` |
+| `--all` | All of the above |
 
 ---
 
-## File structure
+## Usage
 
-```
-skills/
-├── fe-test/
-│   ├── SKILL.md                       ← full pipeline orchestrator
-│   ├── knowledge/
-│   │   └── global-learnings.md        ← cross-session patterns (grows over time)
-│   └── references/
-│       ├── behavioral-theory.md       ← why we test and how
-│       ├── bad-patterns.md            ← 5 anti-patterns checked before delivery
-│       ├── quality-gates.md           ← 3 good pattern anchors
-│       └── adapters/
-│           └── svelte.md              ← Svelte 4 + Vitest gotchas
-├── fe-testing-setup/
-│   └── SKILL.md                       ← one-time repo setup
-└── fe-test-learn/
-    └── SKILL.md                       ← ad-hoc memory saves
-```
+Once installed, use these commands inside your agent:
 
-`.testing-context.md` lives at your **project root** (not inside this plugin). It records what the product does, its critical flows, and a session log. Commit it so it travels with the repo.
+| Command | When to use |
+|---|---|
+| `/fe-test init` | **Once per project.** Scans the repo, infers framework and critical flows, creates `.testing-context.md`. |
+| `/fe-test` | **Every test session.** Full pipeline: discover → plan → write → log. Runs init automatically if no context file exists. |
+| `/fe-test <filename>` | Target a specific file. e.g. `/fe-test PaymentButton.svelte` |
+| `/fe-test-learn` | Save a decision or pattern to memory outside of a test session. |
 
 ---
 
-## Self-learning
+## Reinstalls are safe
 
-`knowledge/global-learnings.md` starts pre-seeded with patterns from real frontend testing sessions. It grows as you work:
-
-- At the end of each `/fe-test` session, the plugin asks once: "Save anything to memory?"
-- `/fe-test-learn` lets you save decisions outside of a test session
-- The file is capped at 30 entries — you'll be prompted to trim when it gets large
-
-**On reinstall:** `global-learnings.md` and `.testing-context.md` are never overwritten. Your accumulated knowledge is safe across updates.
+Running the install script again on an existing install updates managed skill files only.
+Your `global-learnings.md`, `.testing-context.md`, and `.testing-log.md` are never overwritten.
 
 ---
 
-## Adding a framework adapter
+## Requirements
 
-The plugin works without an adapter — it falls back to the agent's training knowledge. Adapters are built from real sessions, not invented upfront:
-
-1. Run `/fe-test` on your project
-2. When you hit framework-specific gotchas, `/fe-test-learn` saves them
-3. After a few sessions, extract them into `skills/fe-test/references/adapters/<framework>.md`
-
-The Svelte adapter wasn't written on day 1 — it accumulated from real failures. Build yours the same way.
-
----
-
-## License
-
-MIT
+`curl` and `bash` — that's it. No Node, no npm.
