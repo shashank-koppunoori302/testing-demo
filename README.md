@@ -1,4 +1,4 @@
-# fe-test
+# fe-test-kit
 
 A skill for AI coding agents that writes frontend tests.
 
